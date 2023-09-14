@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+
+gp='/global/cfs/cdirs/m636/gacocell'
+
+case "$NERSC_HOST" in
+    cori)
+	SENSEI_DIR="$gp/sensei"
+
+	VTK_INC="$gp/visit/3.2.1/linux-x86_64/include/vtk/vtk-8.1"
+	VTK_LIB="$gp/visit/3.2.1/linux-x86_64/lib"
+
+	export SENSEI_CXXFLAGS="-g -O0 -I$SENSEI_DIR/include -I$VTK_INC"
+	export SENSEI_CXXLIBS="-L$SENSEI_DIR/lib -lsensei -lsenseiCore -lpugixml"
+	export SENSEI_CXXLIBS="$SENSEI_CXXLIBS -Wl,-rpath=$VTK_LIB"
+	;;
+    perlmutter)
+	SENSEI_DIR="$gp/perlmutter/SENSEI"
+
+	scf="-g -O0 -I$SENSEI_DIR/include -I$SENSEI_DIR/include/svtk-9.0"
+	export SENSEI_CXXFLAGS="$scf $MPI_ARCH_INC"
+
+	scl="-L$SENSEI_DIR/lib64 -lsensei -lsenseiCore -lpugixml"
+	export SENSEI_CXXLIBS="$scl -Wl,-rpath=$SENSEI_DIR/lib64"
+	#export SENSEI_CXXLIBS="$SENSEI_CXXLIBS $MPI_ARCH_LIBS"
+	;;
+    *)
+	echo "unknown host: $NERSC_HOST"
+	exit 1
+	;;
+esac
+
+wmake
